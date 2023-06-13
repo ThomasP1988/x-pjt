@@ -1,0 +1,30 @@
+enum CollectionStatus {
+  PENDING_VALIDATION
+  ACCEPTED
+  DENIED
+}
+
+type SearchCollection {
+  results: [SearchResult!]!
+  total: Int!
+}
+
+type ListCollection {
+  collections: [Collection!]!
+  next: String
+}
+
+type Collection {
+  chain: String!
+  description: String
+  firstItemId: Int
+  id: String!
+  imagePath: String
+  name: String!
+  openseaSlug: String
+  status: CollectionStatus!
+  supply: String!
+  symbol: String!
+  thumbnailPath: String
+  items(ids: [String]!): [Item]
+}

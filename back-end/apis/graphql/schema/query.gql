@@ -1,0 +1,11 @@
+type Query {
+    getCollection(collectionAddress: String): Collection!
+    listCollections(from: String, limit: Int, status: CollectionStatus): ListCollection
+    listCollectionsByIds(ids: [String!]!): [Collection!]!
+    listItemsByIds(keys: [ItemKeys!]!): [Item!]!
+    listNotifications(from: String, limit: Int): ListNotification
+    me: User
+    searchCollections(from: String, limit: Int, text: String!): SearchCollection
+    getItem(collectionAddress: String!, tokenId: Int!): Item
+}
+

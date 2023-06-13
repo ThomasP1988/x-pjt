@@ -1,0 +1,133 @@
+enum CollectionStatus {
+  PENDING_VALIDATION
+  ACCEPTED
+  DENIED
+}
+
+type SearchCollection {
+  results: [SearchResult!]!
+  total: Int!
+}
+
+type ListCollection {
+  collections: [Collection!]!
+  next: String
+}
+
+type Collection {
+  chain: String!
+  description: String
+  firstItemId: Int
+  id: String!
+  imagePath: String
+  name: String!
+  openseaSlug: String
+  status: CollectionStatus!
+  supply: String!
+  symbol: String!
+  thumbnailPath: String
+  items(ids: [String]!): [Item]
+}
+input ItemKeys {
+  collectionAddress: String,
+  tokenId: String
+}
+
+
+type Item @aws_api_key @aws_iam {
+  id: ID!,
+  tokenURI: String,
+  isFetching: Boolean,
+  collectionAddress: String,
+  image_data: String,
+  name: String,
+  image: String,
+  imagePath: String,
+  thumbnailPath: String,
+  description: String,
+  external_url: String,
+  background_color: String,
+  animation_url: String,
+  youtube_url: String,
+  attributes: [ItemAttribute]
+}
+
+type ItemAttribute @aws_api_key @aws_iam {
+    display_type: String,
+    trait_type: String,
+    value: String,
+    color: String,
+}
+type Mutation {
+  connectWallet( tokenId: String, signature: String): ConnectWalletResponse
+  createToken: CreateNonceToken
+  inviteUser(email: String!): InviteResponse
+  setLastSeenNotification: User
+  submitCollection(description: String, address: String!): Collection
+  validateCollection(symbol: String, name: String, image: String, openseaSlug: String, status: CollectionStatus, address: String!,description: String): Collection
+  notify(input: NotificationInput): Notification
+    @aws_api_key
+  updateItem(collectionAddress: String!, tokenId: String!): Item
+    @aws_api_key
+}
+enum NotificatonType {
+  WELCOME,
+  SILENT_SUBSCRIBED
+}
+
+type Notification @aws_api_key @aws_iam {
+  createdAt: String!
+  id: String!
+  message: String!
+  read: Boolean!
+  type: NotificatonType!
+  userId: String!
+} 
+
+input NotificationInput {
+  createdAt: String!
+  id: String!
+  message: String!
+  read: Boolean!
+  type: NotificatonType!
+  userId: String!
+}
+
+type ListNotification {
+  next: String
+  notifications: [Notification]
+}
+type Query {
+    getCollection(collectionAddress: String): Collection!
+    listCollections(from: String, limit: Int, status: CollectionStatus): ListCollection
+    listCollectionsByIds(ids: [String!]!): [Collection!]!
+    listItemsByIds(keys: [ItemKeys!]!): [Item!]!
+    listNotifications(from: String, limit: Int): ListNotification
+    me: User
+    searchCollections(from: String, limit: Int, text: String!): SearchCollection
+    getItem(collectionAddress: String!, tokenId: Int!): Item
+}
+
+union SearchResult = Collection
+
+type Subscription {
+    notification(userId: String!): Notification @aws_subscribe(mutations: ["notify"])
+    onUpdatedItem(collectionAddress: String!, tokenId: Int!): Item @aws_subscribe(mutations: ["updateItem"])
+}
+type CreateNonceToken {
+  nonce: String
+  token: String
+}
+type User {
+  createdAt: String!
+  email: String!
+  id: String!
+  lastSeenNotification: String!
+}
+
+type InviteResponse {
+  success: Boolean
+}
+type ConnectWalletResponse {
+  success: Boolean
+}

@@ -1,0 +1,23 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: nft
+build:
+  artifacts:
+  - image: apis/grpc
+    context: ../back-end
+    ko: 
+      dir: ./apis/grpc
+  # - image: statefun/functions
+  #   context: ../back-end
+  #   ko: 
+  #     dir: ./statefun
+deploy:
+  kubectl:
+    manifests:
+    - infra/dist/*.k8s.yaml
+    hooks:
+      before:
+        - host:
+            command: ["make", "-C", "infra", "before"]
+            os: [linux]

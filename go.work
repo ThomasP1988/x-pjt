@@ -1,0 +1,15 @@
+go 1.18
+
+use (
+    ./back-end/apis/graphql
+    ./back-end/apis/grpc
+    ./back-end/aws/cognito/post_confirmation
+    ./back-end/aws/dynamodb/notification
+    ./back-end/aws/dynamodb/nft-item
+    ./back-end/aws/sns/fetch_items
+    ./back-end/shared
+    ./back-end/orderbook
+    ./back-end/statefun
+    ./deploy/aws
+    ./deploy/infra
+)

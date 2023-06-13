@@ -1,0 +1,12 @@
+type Mutation {
+  connectWallet( tokenId: String, signature: String): ConnectWalletResponse
+  createToken: CreateNonceToken
+  inviteUser(email: String!): InviteResponse
+  setLastSeenNotification: User
+  submitCollection(description: String, address: String!): Collection
+  validateCollection(symbol: String, name: String, image: String, openseaSlug: String, status: CollectionStatus, address: String!,description: String): Collection
+  notify(input: NotificationInput): Notification
+    @aws_api_key
+  updateItem(collectionAddress: String!, tokenId: String!): Item
+    @aws_api_key
+}

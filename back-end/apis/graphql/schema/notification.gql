@@ -1,0 +1,27 @@
+enum NotificatonType {
+  WELCOME,
+  SILENT_SUBSCRIBED
+}
+
+type Notification @aws_api_key @aws_iam {
+  createdAt: String!
+  id: String!
+  message: String!
+  read: Boolean!
+  type: NotificatonType!
+  userId: String!
+} 
+
+input NotificationInput {
+  createdAt: String!
+  id: String!
+  message: String!
+  read: Boolean!
+  type: NotificatonType!
+  userId: String!
+}
+
+type ListNotification {
+  next: String
+  notifications: [Notification]
+}

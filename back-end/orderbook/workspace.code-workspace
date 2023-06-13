@@ -1,0 +1,13 @@
+{
+    "folders": [
+        {
+            "path": "./nftm-front"
+        },
+        {
+            "path": "./nftm"
+        },
+        {
+            "path": "orderbook"
+        }
+    ]
+}

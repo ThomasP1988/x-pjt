@@ -1,0 +1,102 @@
+
+syntax = "proto3";
+
+option go_package = "orderbook_service/grpc/orderbook";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.orderbook";
+option java_outer_classname = "OrderbookProto";
+
+package orderbooks;
+
+service Orderbooks {
+    rpc SubscribeL2(SubscribeL2Args) returns (stream Prices) {};
+    // rpc OrderBidi(stream OrderArgs) returns (stream Order) {};
+    rpc ProcessOrder(OrderArgs) returns (Order) {};
+    rpc CancelOrder(CancelOrderArgs) returns (Order) {};
+    rpc OrderList(OrderListArgs) returns (OrderListResult) {};
+}
+
+message OrderListResult {
+    string next = 1;
+    repeated Order orders = 2;
+}
+
+message Order {
+    string id = 1;
+    string status = 2;
+    string userId = 3;
+    string symbol = 4;
+    SideOrder side = 5;
+    TypeOrder type = 6;
+    int64 createdAt = 7;
+    string price = 8;
+    string paid = 9;
+    string averagePrice = 10;
+    string quantity = 11;
+    string filledQuantity = 12;
+    string originalQuantity = 13;
+    bool partiallyFilled = 14;
+}
+
+message OrderListArgs {
+    string symbol = 1;
+    string from = 2;
+    int32 limit = 3;
+    bool isOpen = 4;
+}
+
+message SubscribeL2Args {
+    string symbol = 1;
+}
+
+message Prices {
+    int64 timestamp = 1;
+    repeated PriceLevel asks = 2;
+    repeated PriceLevel bids = 3;
+}
+
+message PriceLevel {
+    string price = 1;
+    string quantity = 2;
+    string type = 3;
+}
+
+enum TypeOrder {
+    LIMIT = 0;
+    MARKET = 1;
+}
+
+enum SideOrder {
+    BUY = 0;
+    SELL = 1;
+}
+
+// Limit: side Side, quantity decimal.Decimal, price decimal.Decimal
+// Market: side Side, quantity decimal.Decimal
+message OrderArgs {
+    string symbol = 1;
+    TypeOrder type = 2;
+    SideOrder side = 3;
+    string quantity = 4;
+    string price = 5;
+}
+
+message CancelOrderArgs {
+    string orderId = 1;
+}
+
+// Limit: done []*ob.Order, partial *ob.Order, partialQuantityProcessed decimal.Decimal, err error
+// Market: done []*ob.Order, partial *ob.Order, partialQuantityProcessed decimal.Decimal, quantityLeft decimal.Decimal, err error
+// message OrderResult {
+//     bool hasError = 1;
+//     string error = 2;
+//     string orderId = 3;
+//     int64 transactionTime = 4;
+//     string price = 5;
+//     string originalQuantity = 6;
+//     string executedQuantity = 7;
+//     string cumulativeQuoteQuantity = 8;
+//     string status = 9;
+//     string type = 10;
+//     string side = 11;
+// }

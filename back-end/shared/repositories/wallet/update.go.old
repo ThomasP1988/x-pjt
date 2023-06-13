@@ -1,0 +1,95 @@
+package wallet
+
+import (
+	"context"
+	"fmt"
+	entity "shared/entities/wallet"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+)
+
+type UpdateAdd struct {
+	Currency string
+	Value    int64
+}
+
+type UpdateSub = UpdateAdd
+
+type UpdateCurrencies struct {
+	Add []*UpdateAdd
+	Sub []*UpdateSub
+}
+
+type UpdateArgs struct {
+	Ctx       context.Context
+	UserID    string
+	Own       UpdateCurrencies
+	Available UpdateCurrencies
+}
+
+func Update(args UpdateArgs) (*entity.Wallet, error) {
+	ws := GetWalletService()
+	var updateBuild expression.UpdateBuilder = expression.UpdateBuilder{}
+
+	handleAddSub := func(prefix string, updateData *UpdateCurrencies) {
+
+		for _, updateCur := range updateData.Add {
+			curDefault := expression.Name(prefix + "." + updateCur.Currency).IfNotExists(expression.Value(0))
+			updateValue := expression.Plus(curDefault, expression.Value(updateCur.Value))
+			updateBuild = updateBuild.Set(expression.Name(prefix+"."+updateCur.Currency), updateValue)
+		}
+
+		for _, updateCur := range updateData.Sub {
+			fmt.Printf("Sub updateCur.Value: %v\n", updateCur.Value)
+			curDefault := expression.Name(prefix + "." + updateCur.Currency).IfNotExists(expression.Value(0))
+			updateValue := expression.Minus(curDefault, expression.Value(updateCur.Value))
+			updateBuild = updateBuild.Set(expression.Name(prefix+"."+updateCur.Currency), updateValue)
+		}
+	}
+
+	handleAddSub("own", &args.Own)
+	handleAddSub("available", &args.Available)
+
+	updateBuilt := expression.NewBuilder().WithUpdate(updateBuild)
+	builder, err := updateBuilt.Build()
+
+	if err != nil {
+		fmt.Printf("err.Error(): %v\n", err.Error())
+		return nil, err
+	}
+
+	result, err := ws.Client.UpdateItem(args.Ctx, &dynamodb.UpdateItemInput{
+		Key: map[string]types.AttributeValue{
+			"userId": &types.AttributeValueMemberS{
+				Value: args.UserID,
+			},
+		},
+		TableName:                 aws.String(ws.TableName),
+		ReturnValues:              types.ReturnValueAllNew,
+		ExpressionAttributeNames:  builder.Names(),
+		ExpressionAttributeValues: builder.Values(),
+		UpdateExpression:          builder.Update(),
+	})
+	fmt.Printf("builder.Names(): %v\n", builder.Names())
+	fmt.Printf("builder.Values(): %v\n", builder.Values())
+	fmt.Printf("builder.Update(): %v\n", builder.Update())
+
+	if err != nil {
+		fmt.Printf("err.Error(): %v\n", err.Error())
+		return nil, err
+	}
+
+	output := &entity.Wallet{}
+	err = attributevalue.UnmarshalMap(result.Attributes, output)
+
+	if err != nil {
+		fmt.Printf("err.Error(): %v\n", err.Error())
+		return nil, err
+	}
+
+	return output, nil
+}

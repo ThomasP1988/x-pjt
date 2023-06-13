@@ -1,0 +1,1 @@
+- for developpement purpose we use env variable for AWS access but once it will in production, we should use a mix of 1. k8s service account 2 iam role 3 the oicd provider of EKS

@@ -1,0 +1,6 @@
+language: go
+app: go run .
+imports:
+  - k8s
+  - https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/b6deb7dd41ff09237b62131a2acfeb891dd48b2f/deployments/common/crds/k8s.nginx.org_virtualservers.yaml
+  # - nginxpolicies:=https://raw.githubusercontent.com/nginxinc/kubernetes-ingress/b6deb7dd41ff09237b62131a2acfeb891dd48b2f/deployments/common/crds/k8s.nginx.org_policies.yaml

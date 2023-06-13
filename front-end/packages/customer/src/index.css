@@ -1,0 +1,50 @@
+body, #root {
+    margin: 0;
+    padding: 0;
+    /* background-color: #2b3b44; */
+}
+
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+
+.appbar {
+    z-index: 1;
+    background: linear-gradient(336deg,  #8404bf, #1b9b8e);
+    background-size: 100% 100%;
+    -webkit-clip-path: polygon(0 0, 100% 0%, 100% 0%, 0 83%);
+    clip-path: polygon(0 0, 100% 0%, 225% 0%, 0 84%);
+    min-height: 400px;
+
+    -webkit-animation: AnimationName 20s ease infinite;
+    -moz-animation: AnimationName 20s ease infinite;
+    -o-animation: AnimationName 20s ease infinite;
+    animation: AnimationName 20s ease infinite
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-o-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}

@@ -1,0 +1,90 @@
+package orderbook
+
+import (
+	grpc_ob "NFTM/apis/grpc/expose/orderbook"
+	"context"
+	"errors"
+	"fmt"
+	"io"
+	"shared/entities/auth"
+	client_ob "shared/grpc/orderbook"
+	auth_service "shared/services/auth"
+	"shared/services/orderbooks"
+
+	"google.golang.org/grpc/metadata"
+)
+
+func (s *OrderbookServer) OrderBidi(stream grpc_ob.Orderbooks_OrderBidiServer) error {
+
+	headers, ok := metadata.FromIncomingContext(stream.Context())
+	if !ok {
+		return errors.New("error authenticating (header)")
+	}
+
+	var user *auth.UserAuth
+	var err error
+
+	if authHeader, ok := headers["auth"]; ok {
+		if len(authHeader) != 0 {
+			jwt := authHeader[0]
+			fmt.Printf("jwt: %v\n", jwt)
+			user, err = auth_service.Auth(jwt)
+			if err != nil {
+				return errors.New("error authenticating")
+			}
+			// TODO: find wallet with user
+			fmt.Printf("user: %v\n", user)
+		}
+	}
+
+	for {
+		in, err := stream.Recv()
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if in == nil {
+			continue
+		}
+
+		side := client_ob.SideOrder(in.GetSide())
+		pair, err := OBServices.Start(in.GetSymbol())
+
+		if err != nil {
+			return err
+		}
+
+		var orderResult *orderbooks.OrderResult
+		// fmt.Printf("\"test\": %v\n", "test")
+		if in.Type == grpc_ob.TypeOrder_LIMIT {
+			orderResult, err = OBServices.ProcessLimitOrder(context.Background(), user.ID, pair, side, in.GetQuantity(), in.GetPrice())
+		}
+
+		if in.Type == grpc_ob.TypeOrder_MARKET {
+			orderResult, err = OBServices.ProcessMarketOrder(context.Background(), user.ID, pair, side, in.GetQuantity())
+		}
+
+		if err != nil {
+			result := grpc_ob.OrderResult{
+				HasError: true,
+				Error:    err.Error(),
+			}
+			stream.SendMsg(&result)
+		} else {
+			result := grpc_ob.OrderResult{
+				HasError:                false,
+				OrderId:                 orderResult.OrderId,
+				TransactionTime:         orderResult.TransactionTime.Unix(),
+				Price:                   orderResult.Price.String(),
+				OriginalQuantity:        orderResult.OriginalQuantity.String(),
+				ExecutedQuantity:        orderResult.ExecutedQuantity.String(),
+				CumulativeQuoteQuantity: orderResult.CumulativeQuoteQuantity.String(),
+				Status:                  string(orderResult.Status),
+				Type:                    string(orderResult.Type),
+				Side:                    string(orderResult.Side),
+			}
+			stream.SendMsg(&result)
+		}
+	}
+}

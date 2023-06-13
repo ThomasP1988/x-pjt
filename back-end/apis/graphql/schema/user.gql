@@ -1,0 +1,10 @@
+type User {
+  createdAt: String!
+  email: String!
+  id: String!
+  lastSeenNotification: String!
+}
+
+type InviteResponse {
+  success: Boolean
+}

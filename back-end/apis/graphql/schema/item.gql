@@ -1,0 +1,30 @@
+input ItemKeys {
+  collectionAddress: String,
+  tokenId: String
+}
+
+
+type Item @aws_api_key @aws_iam {
+  id: ID!,
+  tokenURI: String,
+  isFetching: Boolean,
+  collectionAddress: String,
+  image_data: String,
+  name: String,
+  image: String,
+  imagePath: String,
+  thumbnailPath: String,
+  description: String,
+  external_url: String,
+  background_color: String,
+  animation_url: String,
+  youtube_url: String,
+  attributes: [ItemAttribute]
+}
+
+type ItemAttribute @aws_api_key @aws_iam {
+    display_type: String,
+    trait_type: String,
+    value: String,
+    color: String,
+}

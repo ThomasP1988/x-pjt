@@ -1,0 +1,4 @@
+type Subscription {
+    notification(userId: String!): Notification @aws_subscribe(mutations: ["notify"])
+    onUpdatedItem(collectionAddress: String!, tokenId: Int!): Item @aws_subscribe(mutations: ["updateItem"])
+}

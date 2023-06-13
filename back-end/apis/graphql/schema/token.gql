@@ -1,0 +1,4 @@
+type CreateNonceToken {
+  nonce: String
+  token: String
+}

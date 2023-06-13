@@ -1,0 +1,96 @@
+
+syntax = "proto3";
+
+option go_package = "orderbook_service/grpc/orderbook";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.orderbook";
+option java_outer_classname = "OrderbookProto";
+
+// import "google/protobuf/empty.proto";
+
+package orderbook;
+
+service Orderbook {
+    rpc SubscribeL2(SubscribeArgs) returns (stream Prices) {}
+    rpc NewLimitOrder(NewLimitOrderArgs) returns (NewLimitOrderResponse) {}
+    rpc NewMarketOrder(NewMarketOrderArgs) returns (NewMarketOrderResponse) {}
+    rpc CancelOrder(CancelOrderArgs) returns (CancelOrderResult) {}
+}
+
+message Prices {
+    int64 timestamp = 1;
+    repeated PriceLevel asks = 2;
+    repeated PriceLevel bids = 3;
+    string pair = 4;
+}
+
+message PriceLevel {
+    string price = 1;
+    string quantity = 2;
+}
+
+enum SideOrder {
+    BUY = 0;
+    SELL = 1;
+}
+
+message Order {
+    SideOrder side = 1;
+	string id = 2; 
+	int64 timestamp = 3;
+	int64 quantity = 4;
+	int64 price = 5;
+}
+
+message CancelOrderArgs {
+    string pair = 1;
+    string orderId = 2;
+}
+
+message CancelOrderResult {
+    bool success = 1;
+}
+
+message SubscribeArgs {
+    string pair = 1;
+}
+// args
+// Limit: side ob.Side, orderID string, quantity decimal.Decimal, price decimal.Decimal
+message NewLimitOrderArgs {
+    string pair = 1;
+    SideOrder side = 3;
+    string orderId = 2;
+    int64 quantity = 4;
+    int64 price = 5;
+}
+
+// response
+// Limit: done []*ob.Order, partial *ob.Order, partialQuantityProcessed decimal.Decimal, err error
+
+message NewLimitOrderResponse {
+    repeated Order order = 1;
+    Order partial = 2;
+    int64 partialQuantityProcessed = 3;
+    string transactionTime = 4;
+}
+
+// args
+// Market: side Side, quantity decimal.Decimal
+
+message NewMarketOrderArgs {
+    string pair = 1;
+    SideOrder side = 3;
+    int64 quantity = 4;
+}
+
+// response
+// Market: done []*ob.Order, partial *ob.Order, partialQuantityProcessed decimal.Decimal, quantityLeft decimal.Decimal, err error
+
+message NewMarketOrderResponse {
+    repeated Order order = 1;
+    Order partial = 2;
+    int64 partialQuantityProcessed = 3;
+    int64 quantityLeft = 4;
+    string transactionTime = 5;
+}
+
